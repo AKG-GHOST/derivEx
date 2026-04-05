@@ -1,0 +1,157 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Pages */
+.page {
+    width: 100%;
+    height: 100vh;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    transition: 0.5s ease;
+    opacity: 0;
+}
+
+.page.active {
+    display: flex;
+    opacity: 1;
+}
+
+/* PAGE 1 */
+.page1 {
+    background: #ffc0da;
+    overflow: hidden;
+    position: relative;
+}
+
+.page1::before {
+    content: "KA";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-10deg);
+    font-size: 420px;
+    font-weight: 900;
+    color: transparent;
+    -webkit-text-stroke: 3px rgba(255, 255, 255, 0.35);
+    letter-spacing: 25px;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.ka-logo {
+    font-size: 95px;
+    font-weight: 900;
+    color: white;
+    cursor: pointer;
+    z-index: 2;
+}
+
+.ka-logo:hover {
+    transform: scale(1.08);
+}
+
+/* PAGE 2 */
+.page2 {
+    background: linear-gradient(to top, #222, #369);
+}
+
+.intro-card {
+    background: rgba(255, 255, 255, 0.12);
+    padding: 50px 70px;
+    border-radius: 20px;
+    text-align: center;
+    color: white;
+    cursor: pointer;
+}
+
+.intro-card h1 {
+    font-size: 50px;
+}
+
+.intro-card p {
+    font-size: 20px;
+}
+
+.intro-card h2 {
+    font-size: 35px;
+}
+
+/* PAGE 3 */
+.page3 {
+    background-image: url("images/background.avif");
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+/* Features */
+.features {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.8s ease;
+}
+
+.features.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.features h1 {
+    font-size: 3rem;
+    color: white;
+}
+
+.features h2 {
+    font-size: 1.5rem;
+    color: cyan;
+}
+
+/* Clock */
+.clock-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.clock-container svg {
+    width: 280px;
+}
+
+.crescent {
+    fill: none;
+    stroke: cyan;
+    stroke-width: 6;
+    filter: drop-shadow(0 0 10px cyan);
+    will-change: transform;
+}
+
+.hand {
+    stroke: white;
+    stroke-width: 3;
+    transform-origin: 150px 150px;
+    transform-box: fill-box;
+}
+
+.second {
+    stroke: cyan;
+    stroke-width: 2;
+}
+
+.center-dot {
+    fill: white;
+}
+
+/* Mobile Fix */
+@media (max-width: 768px) {
+    .page3 {
+        background-attachment: scroll;
+    }
+}
