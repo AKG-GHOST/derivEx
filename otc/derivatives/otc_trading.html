@@ -1,0 +1,502 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DerivEx \u2014 OTC Derivatives Trading</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+<body data-page="otc">
+
+  <!-- NOTIFICATION CONTAINER -->
+  <div class="notification-container" id="notificationContainer"></div>
+
+  <!-- TICKER TAPE -->
+  <div class="ticker-tape">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">
+        <div class="logo-icon">D</div>
+        <div>
+          <div class="logo-text">DerivEx</div>
+          <span class="logo-sub">OTC Trading Desk</span>
+        </div>
+      </div>
+      <div class="market-status">
+        <div class="status-dot"></div>
+        <span>OTC Desk Open</span>
+      </div>
+    </div>
+    <div class="header-center">
+      <div class="header-time" id="headerTime">--:--:-- EST</div>
+    </div>
+    <div class="header-right">
+      <div class="balance-display">
+        <span class="balance-label">Equity</span>
+        <span class="balance-value" id="headerBalance">$500,000.00</span>
+      </div>
+      <button class="btn-theme" id="themeToggle" title="Toggle Theme">\ud83c\udf19</button>
+    </div>
+  </header>
+
+  <!-- APP LAYOUT -->
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Navigation</div>
+        <a href="index.html" class="nav-item">
+          <span class="nav-icon">\ud83d\udcca</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="stock_exchange.html" class="nav-item">
+          <span class="nav-icon">\ud83d\udcc8</span>
+          <span>Stock Exchange</span>
+        </a>
+        <a href="otc_trading.html" class="nav-item active">
+          <span class="nav-icon">\ud83e\udd1d</span>
+          <span>OTC Trading</span>
+        </a>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">OTC Instruments</div>
+        <div class="mini-watchlist" id="sidebarWatchlist"></div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <!-- PAGE HEADER -->
+      <div class="page-header">
+        <div>
+          <div class="page-title">\ud83e\udd1d OTC Derivatives Desk</div>
+          <div class="page-subtitle">Over-the-counter: Forward Contracts \u00b7 Interest Rate Swaps \u00b7 Index Return Swaps</div>
+        </div>
+        <div class="page-actions">
+          <div class="otc-badge">\ud83d\udd12 Private Bilateral Trades</div>
+        </div>
+      </div>
+
+      <!-- OTC EXPLAINER BANNER -->
+      <div style="margin:12px 24px 0;padding:12px 18px;background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.25);border-radius:10px;font-size:12px;color:var(--text-secondary);line-height:1.7;">
+        <strong style="color:#a78bfa;">\u2139\ufe0f OTC Market Notice:</strong>
+        OTC derivatives are privately negotiated contracts between two parties, traded off formal exchanges.
+        They include <strong>Forward Contracts</strong> (customized future delivery agreements),
+        <strong>Interest Rate Swaps</strong> (exchanging fixed for floating rate cash flows),
+        and <strong>Index Return Swaps</strong> (total return of an index against a fixed/floating rate).
+        All OTC prices include a negotiated premium above mid-market. Min. notional requirements apply.
+      </div>
+
+      <!-- STATS ROW -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Balance</div>
+          <div class="stat-value" id="balanceValue">$500,000.00</div>
+          <div class="stat-change up">\ud83d\udcb0 Available</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Equity</div>
+          <div class="stat-value" id="equityValue">$500,000.00</div>
+          <div class="stat-change up" id="totalPnL">+$0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Used Margin</div>
+          <div class="stat-value" id="usedMarginValue">$0.00</div>
+          <div class="stat-change">\ud83d\udccc Collateral</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Free Margin</div>
+          <div class="stat-value green" id="freeMarginValue">$500,000.00</div>
+          <div class="stat-change up">\u2705 Tradeable</div>
+        </div>
+      </div>
+
+      <!-- MAIN TRADING AREA -->
+      <div style="display:grid;grid-template-columns:1fr 340px;gap:12px;padding:0 24px 16px;">
+
+        <!-- LEFT COLUMN -->
+        <div style="display:flex;flex-direction:column;gap:12px;">
+
+          <!-- CHART CARD -->
+          <div class="card">
+            <div class="chart-toolbar">
+              <div class="chart-toolbar-left">
+                <div class="asset-selector-wrapper">
+                  <div>
+                    <select class="form-input select-styled" id="otcAssetSelect" style="width:220px;padding:6px 28px 6px 10px;font-size:12px;margin:0;"></select>
+                  </div>
+                  <div class="asset-price-display" id="chartAssetPrice">\u2014</div>
+                  <div class="asset-change-display up" id="chartAssetChange">\u2014</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <div class="chart-timeframes">
+                  <button class="tf-btn active" data-tf="1D" onclick="setTimeframe('1D')">1D</button>
+                  <button class="tf-btn" data-tf="1W" onclick="setTimeframe('1W')">1W</button>
+                  <button class="tf-btn" data-tf="1M" onclick="setTimeframe('1M')">1M</button>
+                  <button class="tf-btn" data-tf="3M" onclick="setTimeframe('3M')">3M</button>
+                </div>
+                <div class="chart-types">
+                  <button class="ct-btn active" data-type="line" onclick="setChartType('line')">Line</button>
+                  <button class="ct-btn" data-type="area" onclick="setChartType('area')">Area</button>
+                  <button class="ct-btn" data-type="candle" onclick="setChartType('candle')">OHLC</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ASSET INFO BAR -->
+            <div style="display:flex;gap:20px;padding:0 16px 10px;flex-wrap:wrap;" id="assetInfoBar">
+              <div style="font-size:11px;color:var(--text-muted)">Mid: <span class="text-mono fw-600" id="infoMid">\u2014</span></div>
+              <div style="font-size:11px;color:var(--text-muted)">Bid: <span class="text-mono fw-600 text-red" id="infoBid">\u2014</span></div>
+              <div style="font-size:11px;color:var(--text-muted)">Ask: <span class="text-mono fw-600 text-green" id="infoAsk">\u2014</span></div>
+              <div style="font-size:11px;color:var(--text-muted)">OTC Premium: <span class="text-mono fw-600" id="infoPremium">\u2014</span></div>
+              <div style="font-size:11px;color:var(--text-muted)">Tenor: <span class="text-mono fw-600" id="infoTenor">\u2014</span></div>
+              <div style="font-size:11px;color:var(--text-muted)">Min Notional: <span class="text-mono fw-600" id="infoMinNotional">\u2014</span></div>
+            </div>
+
+            <div class="chart-container">
+              <canvas id="mainChart"></canvas>
+            </div>
+            <div class="chart-container" style="padding:0 16px 8px;">
+              <div style="font-size:10px;color:var(--text-muted);padding:4px 0;">Volume</div>
+              <canvas id="volumeChart"></canvas>
+            </div>
+          </div>
+
+          <!-- OTC MARKET TABLE -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">\ud83d\udccb OTC Derivatives Market</div>
+              <div class="card-actions">
+                <div class="otc-badge" style="font-size:10px;">OTC</div>
+                <span class="card-badge badge-purple" style="margin-left:4px;" id="otcAssetCount">9 Instruments</span>
+              </div>
+            </div>
+
+            <!-- Category filter tabs -->
+            <div class="tab-nav" data-tab-group="otcFilter">
+              <button class="tab-btn active" data-tab="otcTabAll" data-tab-group="otcFilter">All OTC</button>
+              <button class="tab-btn" data-tab="otcTabFwd" data-tab-group="otcFilter">Forwards</button>
+              <button class="tab-btn" data-tab="otcTabIRS" data-tab-group="otcFilter">IRS</button>
+              <button class="tab-btn" data-tab="otcTabIXS" data-tab-group="otcFilter">Index Swaps</button>
+            </div>
+
+            <div id="otcTabAll" class="tab-content active" data-tab-panel="otcFilter">
+              <div id="otcMarketTable"></div>
+            </div>
+            <div id="otcTabFwd" class="tab-content" data-tab-panel="otcFilter">
+              <div id="otcForwardsTable"></div>
+            </div>
+            <div id="otcTabIRS" class="tab-content" data-tab-panel="otcFilter">
+              <div id="otcIRSTable"></div>
+            </div>
+            <div id="otcTabIXS" class="tab-content" data-tab-panel="otcFilter">
+              <div id="otcIXSTable"></div>
+            </div>
+          </div>
+
+        </div><!-- /LEFT -->
+
+        <!-- RIGHT COLUMN: OTC Trading Panel -->
+        <div style="display:flex;flex-direction:column;gap:12px;">
+
+          <!-- OTC TRADING PANEL -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">\u26a1 OTC Trade Ticket</div>
+              <div class="otc-badge" style="font-size:10px;">Private</div>
+            </div>
+            <div class="trading-panel">
+
+              <!-- Buy / Receive / Sell / Pay -->
+              <div class="trade-tabs">
+                <button class="trade-tab active-buy" id="buyTabBtn">\u25b2 BUY / RECEIVE</button>
+                <button class="trade-tab" id="sellTabBtn">\u25bc SELL / PAY</button>
+              </div>
+
+              <!-- Order type (OTC uses negotiated/limit) -->
+              <div class="order-types">
+                <button class="order-type-btn active" data-type="market">At-Market</button>
+                <button class="order-type-btn" data-type="limit">Negotiated</button>
+              </div>
+
+              <form id="otcTradeForm">
+                <!-- Instrument Description -->
+                <div style="background:rgba(124,58,237,0.08);border:1px solid rgba(124,58,237,0.2);border-radius:6px;padding:8px 10px;margin-bottom:12px;font-size:11px;color:var(--text-secondary);line-height:1.5;" id="otcAssetDesc">
+                  Select an OTC derivative from the market table or dropdown above.
+                </div>
+
+                <!-- Counterparty Info -->
+                <div class="counterparty-info">
+                  <div class="counterparty-row"><span>Counterparty</span><span class="value" id="cpName">DerivEx Bank Ltd.</span></div>
+                  <div class="counterparty-row"><span>Credit Rating</span><span class="value" style="color:var(--green)">AA+</span></div>
+                  <div class="counterparty-row"><span>Settlement</span><span class="value" id="cpSettlement">T+2 (Cash)</span></div>
+                  <div class="counterparty-row"><span>ISDA Agreement</span><span class="value" style="color:var(--green)">\u2705 Signed</span></div>
+                </div>
+
+                <!-- Price -->
+                <div class="form-group">
+                  <div class="form-label">OTC Price (incl. Premium) <span id="otcPriceNote">At-Market</span></div>
+                  <input class="form-input green-focus" type="number" id="tradePrice" step="0.0001" min="0" placeholder="Auto (incl. OTC premium)" />
+                </div>
+
+                <!-- Notional / Quantity -->
+                <div class="form-group">
+                  <div class="form-label">Notional / Contracts <span id="minNotionalLabel">Min: \u2014</span></div>
+                  <input class="form-input" type="number" id="tradeQty" min="1" value="1" placeholder="1" />
+                  <div class="qty-presets">
+                    <button type="button" class="qty-preset-btn" data-qty="1">1</button>
+                    <button type="button" class="qty-preset-btn" data-qty="10">10</button>
+                    <button type="button" class="qty-preset-btn" data-qty="50">50</button>
+                    <button type="button" class="qty-preset-btn" data-qty="100">100</button>
+                  </div>
+                </div>
+
+                <!-- IRS-specific fields (shown for IRS) -->
+                <div id="irsFields" style="display:none;">
+                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+                    <div class="form-group" style="margin-bottom:0;">
+                      <div class="form-label">Fixed Rate</div>
+                      <input class="form-input" type="text" id="irsFixed" placeholder="e.g. 4.25%" readonly />
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                      <div class="form-label">Floating Index</div>
+                      <input class="form-input" type="text" id="irsFloating" placeholder="e.g. SOFR" readonly />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="order-summary">
+                  <div class="order-summary-row">
+                    <span>Notional Value</span>
+                    <span class="value" id="orderTotal">\u2014</span>
+                  </div>
+                  <div class="order-summary-row">
+                    <span>OTC Premium</span>
+                    <span class="value" id="otcPremiumDisplay">\u2014</span>
+                  </div>
+                  <div class="order-summary-row">
+                    <span>Req. Margin</span>
+                    <span class="value" id="orderMargin">\u2014</span>
+                  </div>
+                  <div class="order-summary-row">
+                    <span>Est. Fee</span>
+                    <span class="value" id="orderFee">\u2014</span>
+                  </div>
+                  <div class="order-summary-row" style="border-top:1px solid var(--border-color);padding-top:6px;margin-top:4px;">
+                    <span>Available</span>
+                    <span class="value green" id="availableBalance">\u2014</span>
+                  </div>
+                </div>
+
+                <button type="submit" class="execute-btn buy" id="executeBtn">BUY / RECEIVE \u2014</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- OTC MARKET DEPTH / INFO PANEL -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">\ud83d\udcca Market Depth</div>
+              <span class="card-badge badge-purple">OTC Indicative</span>
+            </div>
+            <div class="order-book scrollable" id="orderBookContent" style="max-height:260px;">
+              <div class="empty-state"><div class="empty-icon">\ud83d\udcd6</div>Select an OTC derivative</div>
+            </div>
+          </div>
+
+          <!-- RISK DISCLAIMER -->
+          <div style="padding:12px 14px;background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);border-radius:10px;font-size:10.5px;color:var(--text-muted);line-height:1.6;">
+            \u26a0\ufe0f <strong style="color:var(--yellow);">Risk Notice:</strong>
+            OTC derivatives carry counterparty risk and are not centrally cleared.
+            Prices shown are indicative. Actual execution may vary based on negotiation.
+            Minimum notional requirements apply. This is a simulation platform.
+          </div>
+
+        </div><!-- /RIGHT COLUMN -->
+      </div>
+
+      <!-- PORTFOLIO + HISTORY -->
+      <div style="padding:0 24px 24px;">
+        <div class="card">
+          <div class="tab-nav" data-tab-group="otcPortfolio">
+            <button class="tab-btn active" data-tab="otcTabPositions" data-tab-group="otcPortfolio">\ud83d\udcbc All Positions</button>
+            <button class="tab-btn" data-tab="otcTabTradeHist" data-tab-group="otcPortfolio">\ud83d\udccb Trade History</button>
+            <button class="tab-btn" data-tab="otcTabSwaps" data-tab-group="otcPortfolio">\ud83d\udd04 Active Swaps</button>
+          </div>
+
+          <!-- Positions -->
+          <div id="otcTabPositions" class="tab-content active" data-tab-panel="otcPortfolio">
+            <div class="scrollable" style="max-height:280px;">
+              <table class="positions-table">
+                <thead>
+                  <tr>
+                    <th>Symbol</th><th>Side</th><th>Qty</th>
+                    <th>Avg Price</th><th>Current</th>
+                    <th>P&L</th><th>P&L %</th><th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="portfolioTableBody">
+                  <tr><td colspan="8" class="empty-state"><div class="empty-icon">\ud83d\udcc2</div>No open positions</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Trade History -->
+          <div id="otcTabTradeHist" class="tab-content" data-tab-panel="otcPortfolio">
+            <div class="scrollable" style="max-height:280px;">
+              <table class="trade-history-table">
+                <thead>
+                  <tr><th>Time</th><th>Symbol</th><th>Side</th><th>Qty</th><th>Price</th><th>Total</th><th>P&L</th><th>Status</th></tr>
+                </thead>
+                <tbody id="tradeHistoryBody">
+                  <tr><td colspan="8" class="empty-state"><div class="empty-icon">\ud83d\udccb</div>No trades yet</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Active Swaps -->
+          <div id="otcTabSwaps" class="tab-content" data-tab-panel="otcPortfolio">
+            <div class="scrollable" style="max-height:280px;" id="activeSwapsPanel">
+              <div class="empty-state" style="padding:40px 16px;">
+                <div class="empty-icon">\ud83d\udd04</div>
+                <div>No active swap agreements</div>
+                <div style="margin-top:6px;font-size:11px;">Execute IRS or Index Return Swap trades to see them here</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Render sub-tables after engine init
+      setTimeout(() => {
+        if (typeof OTC_DERIVATIVES !== 'undefined' && typeof renderMarketTable === 'function') {
+          renderMarketTable('otcForwardsTable', OTC_DERIVATIVES.filter(a => a.type === 'Forward Contract'));
+          renderMarketTable('otcIRSTable', OTC_DERIVATIVES.filter(a => a.type === 'Interest Rate Swap'));
+          renderMarketTable('otcIXSTable', OTC_DERIVATIVES.filter(a => a.type === 'Index Return Swap'));
+          document.getElementById('otcAssetCount').textContent = OTC_DERIVATIVES.length + ' Instruments';
+        }
+      }, 200);
+    });
+
+    // Patch selectAssetAndTrade for OTC info bar + IRS fields + description
+    const _origOTCSelect = window.selectAssetAndTrade;
+    window.selectAssetAndTrade = function(assetId) {
+      _origOTCSelect(assetId);
+      const asset = typeof findAsset === 'function' ? findAsset(assetId) : null;
+      if (!asset) return;
+
+      const el = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+      const spread = asset.price * 0.0005;
+      el('infoMid', typeof formatPrice === 'function' ? formatPrice(asset.price, assetId) : asset.price.toFixed(4));
+      el('infoBid', typeof formatPrice === 'function' ? formatPrice(asset.price - spread, assetId) : (asset.price - spread).toFixed(4));
+      el('infoAsk', typeof formatPrice === 'function' ? formatPrice(asset.price + spread, assetId) : (asset.price + spread).toFixed(4));
+      el('infoPremium', (asset.premium || 2) + '%');
+      el('infoTenor', asset.expiry || '\u2014');
+      el('infoMinNotional', asset.minNotional ? '$' + asset.minNotional.toLocaleString() : '\u2014');
+
+      // Show/hide IRS fields
+      const irsDiv = document.getElementById('irsFields');
+      if (irsDiv) {
+        if (asset.type === 'Interest Rate Swap') {
+          irsDiv.style.display = 'block';
+          const fixedEl = document.getElementById('irsFixed');
+          const floatEl = document.getElementById('irsFloating');
+          if (fixedEl) fixedEl.value = (asset.fixedRate || '\u2014') + '%';
+          if (floatEl) floatEl.value = asset.floatingIndex || '\u2014';
+        } else {
+          irsDiv.style.display = 'none';
+        }
+      }
+
+      // Description
+      const descEl = document.getElementById('otcAssetDesc');
+      if (descEl && asset.description) {
+        descEl.innerHTML = `<strong>${asset.symbol}</strong> \u2014 ${asset.description}`;
+      }
+
+      // Min notional label
+      const mnEl = document.getElementById('minNotionalLabel');
+      if (mnEl) mnEl.textContent = asset.minNotional ? 'Min: $' + asset.minNotional.toLocaleString() : '';
+
+      // Counterparty settlement by type
+      const cpSetEl = document.getElementById('cpSettlement');
+      if (cpSetEl) {
+        if (asset.type === 'Interest Rate Swap') cpSetEl.textContent = 'Semi-Annual (Net)';
+        else if (asset.type === 'Index Return Swap') cpSetEl.textContent = 'Quarterly (Net)';
+        else cpSetEl.textContent = 'T+2 (Cash)';
+      }
+
+      // OTC Premium display
+      const premEl = document.getElementById('otcPremiumDisplay');
+      if (premEl) premEl.textContent = (asset.premium || 2) + '% above mid';
+
+      // Sync dropdown
+      const sel = document.getElementById('otcAssetSelect');
+      if (sel && sel.value !== assetId) sel.value = assetId;
+
+      // Update active swaps panel
+      updateActiveSwaps();
+    };
+
+    function updateActiveSwaps() {
+      const el = document.getElementById('activeSwapsPanel');
+      if (!el || typeof state === 'undefined') return;
+      const swaps = state.positions.filter(p => {
+        const a = typeof findAsset === 'function' ? findAsset(p.assetId) : null;
+        return a && (a.type === 'Interest Rate Swap' || a.type === 'Index Return Swap');
+      });
+      if (swaps.length === 0) {
+        el.innerHTML = `<div class="empty-state" style="padding:40px 16px;"><div class="empty-icon">\ud83d\udd04</div><div>No active swap agreements</div></div>`;
+        return;
+      }
+      el.innerHTML = swaps.map(p => {
+        const a = typeof findAsset === 'function' ? findAsset(p.assetId) : {};
+        const pnlClass = p.pnl >= 0 ? 'pnl-positive' : 'pnl-negative';
+        return `
+          <div style="padding:12px 16px;border-bottom:1px solid var(--border-color);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <div>
+                <span class="fw-600">${p.symbol}</span>
+                <span class="card-badge badge-purple" style="margin-left:8px;">${a.type || 'Swap'}</span>
+              </div>
+              <span class="${pnlClass}">${p.pnl >= 0 ? '+' : ''}${typeof formatCurrency === 'function' ? formatCurrency(p.pnl) : p.pnl.toFixed(2)}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;font-size:11px;">
+              <div><span class="text-muted">Side:</span> <span class="fw-600">${p.side.toUpperCase()}</span></div>
+              <div><span class="text-muted">Qty:</span> <span class="text-mono">${p.qty}</span></div>
+              <div><span class="text-muted">Avg:</span> <span class="text-mono">${typeof formatPrice === 'function' ? formatPrice(p.avgPrice, p.assetId) : p.avgPrice.toFixed(2)}</span></div>
+              ${a.fixedRate ? `<div><span class="text-muted">Fixed:</span> <span class="text-mono text-green">${a.fixedRate}%</span></div>` : ''}
+              ${a.floatingIndex ? `<div><span class="text-muted">Float:</span> <span class="text-mono">${a.floatingIndex}</span></div>` : ''}
+              <div><span class="text-muted">Tenor:</span> <span class="text-mono">${a.expiry || '\u2014'}</span></div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // Periodically refresh active swaps
+    setInterval(updateActiveSwaps, 3000);
+  </script>
+</body>
+</html>

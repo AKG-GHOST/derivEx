@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DerivEx \u2014 Derivatives Trading Platform</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+<body data-page="dashboard">
+
+  <!-- NOTIFICATION CONTAINER -->
+  <div class="notification-container" id="notificationContainer"></div>
+
+  <!-- TICKER TAPE -->
+  <div class="ticker-tape">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">
+        <div class="logo-icon">D</div>
+        <div>
+          <div class="logo-text">DerivEx</div>
+          <span class="logo-sub">Derivatives Platform</span>
+        </div>
+      </div>
+      <div class="market-status">
+        <div class="status-dot"></div>
+        <span>Market Open</span>
+      </div>
+    </div>
+    <div class="header-center">
+      <div class="header-time" id="headerTime">--:--:-- EST</div>
+    </div>
+    <div class="header-right">
+      <div class="balance-display">
+        <span class="balance-label">Equity</span>
+        <span class="balance-value" id="headerBalance">$500,000.00</span>
+      </div>
+      <button class="btn-theme" id="themeToggle" title="Toggle Theme">\ud83c\udf19</button>
+    </div>
+  </header>
+
+  <!-- APP LAYOUT -->
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Navigation</div>
+        <a href="index.html" class="nav-item active">
+          <span class="nav-icon">\ud83d\udcca</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="stock_exchange.html" class="nav-item">
+          <span class="nav-icon">\ud83d\udcc8</span>
+          <span>Stock Exchange</span>
+        </a>
+        <a href="otc_trading.html" class="nav-item">
+          <span class="nav-icon">\ud83e\udd1d</span>
+          <span>OTC Trading</span>
+        </a>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Watchlist</div>
+        <div class="mini-watchlist" id="sidebarWatchlist"></div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <!-- PAGE HEADER -->
+      <div class="page-header">
+        <div>
+          <div class="page-title">Dashboard Overview</div>
+          <div class="page-subtitle">Live derivatives market \u2014 All prices simulated in real-time</div>
+        </div>
+        <div class="page-actions">
+          <a href="stock_exchange.html"><button class="action-btn-sm" style="padding:7px 14px;font-size:12px;">\ud83d\udcc8 Exchange</button></a>
+          <a href="otc_trading.html"><button class="action-btn-sm" style="padding:7px 14px;font-size:12px;">\ud83e\udd1d OTC</button></a>
+        </div>
+      </div>
+
+      <!-- STATS ROW -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Account Balance</div>
+          <div class="stat-value" id="balanceValue">$500,000.00</div>
+          <div class="stat-change up">\ud83d\udcb0 Available Funds</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Equity</div>
+          <div class="stat-value" id="equityValue">$500,000.00</div>
+          <div class="stat-change up" id="totalPnL">+$0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Gainers Today</div>
+          <div class="stat-value green" id="gainersCount">\u2014</div>
+          <div class="stat-change up">\u25b2 Instruments up</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Losers Today</div>
+          <div class="stat-value red" id="losersCount">\u2014</div>
+          <div class="stat-change down">\u25bc Instruments down</div>
+        </div>
+      </div>
+
+      <!-- CHART + TRADING PANEL -->
+      <div class="dashboard-grid" style="padding:0 24px 16px;">
+
+        <!-- LEFT: Chart -->
+        <div class="card">
+          <div class="chart-toolbar">
+            <div class="chart-toolbar-left">
+              <div class="asset-selector-wrapper">
+                <div class="asset-name-display" id="chartAssetName">AAPL-FUT</div>
+                <div class="asset-price-display" id="chartAssetPrice">\u2014</div>
+                <div class="asset-change-display up" id="chartAssetChange">\u2014</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <div class="chart-timeframes">
+                <button class="tf-btn active" data-tf="1D" onclick="setTimeframe('1D')">1D</button>
+                <button class="tf-btn" data-tf="1W" onclick="setTimeframe('1W')">1W</button>
+                <button class="tf-btn" data-tf="1M" onclick="setTimeframe('1M')">1M</button>
+                <button class="tf-btn" data-tf="3M" onclick="setTimeframe('3M')">3M</button>
+              </div>
+              <div class="chart-types">
+                <button class="ct-btn active" data-type="line" onclick="setChartType('line')">Line</button>
+                <button class="ct-btn" data-type="area" onclick="setChartType('area')">Area</button>
+                <button class="ct-btn" data-type="candle" onclick="setChartType('candle')">OHLC</button>
+              </div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="mainChart"></canvas>
+          </div>
+          <div class="chart-container" style="padding:0 16px 8px;">
+            <div style="font-size:10px;color:var(--text-muted);padding:4px 0;">Volume</div>
+            <canvas id="volumeChart"></canvas>
+          </div>
+        </div>
+
+        <!-- RIGHT: Order Book + Trading Panel -->
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">\u2696\ufe0f Order Book</div>
+              <span class="card-badge badge-blue" id="tradeAssetName">\u2014</span>
+            </div>
+            <div class="order-book scrollable" id="orderBookContent">
+              <div class="empty-state"><div class="empty-icon">\ud83d\udcd6</div>Select an asset to view order book</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MARKET TABLE -->
+      <div style="padding:0 24px 16px;">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">\ud83c\udf10 All Derivatives Market</div>
+            <div class="card-actions">
+              <span class="card-badge badge-blue">Live Prices</span>
+            </div>
+          </div>
+          <div class="card-body" style="padding:0 0 4px">
+            <div id="dashboardMarketTable"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PORTFOLIO + TRADE HISTORY -->
+      <div class="grid-2col" style="padding:0 24px 24px;">
+        <!-- Positions -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">\ud83d\udcbc Open Positions</div>
+            <span class="card-badge badge-green" id="positionsCount">0 Positions</span>
+          </div>
+          <div class="scrollable" style="max-height:260px;">
+            <table class="positions-table">
+              <thead>
+                <tr>
+                  <th>Symbol</th><th>Side</th><th>Qty</th><th>Avg Price</th>
+                  <th>Current</th><th>P&L</th><th>P&L %</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="portfolioTableBody">
+                <tr><td colspan="8" class="empty-state"><div class="empty-icon">\ud83d\udcc2</div>No open positions</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Trade History -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">\ud83d\udccb Trade History</div>
+            <span class="card-badge badge-blue">Last 50</span>
+          </div>
+          <div class="scrollable" style="max-height:260px;">
+            <table class="trade-history-table">
+              <thead>
+                <tr><th>Time</th><th>Symbol</th><th>Side</th><th>Qty</th><th>Price</th><th>Total</th><th>P&L</th><th>Status</th></tr>
+              </thead>
+              <tbody id="tradeHistoryBody">
+                <tr><td colspan="8" class="empty-state"><div class="empty-icon">\ud83d\udccb</div>No trades yet</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

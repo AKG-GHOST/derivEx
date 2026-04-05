@@ -1,0 +1,398 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DerivEx \u2014 Stock Exchange Derivatives</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+<body data-page="stock">
+
+  <!-- NOTIFICATION CONTAINER -->
+  <div class="notification-container" id="notificationContainer"></div>
+
+  <!-- TICKER TAPE -->
+  <div class="ticker-tape">
+    <div class="ticker-track" id="tickerTrack"></div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <div class="logo">
+        <div class="logo-icon">D</div>
+        <div>
+          <div class="logo-text">DerivEx</div>
+          <span class="logo-sub">Stock Exchange</span>
+        </div>
+      </div>
+      <div class="market-status">
+        <div class="status-dot"></div>
+        <span>Exchange Open</span>
+      </div>
+    </div>
+    <div class="header-center">
+      <div class="header-time" id="headerTime">--:--:-- EST</div>
+    </div>
+    <div class="header-right">
+      <div class="balance-display">
+        <span class="balance-label">Equity</span>
+        <span class="balance-value" id="headerBalance">$500,000.00</span>
+      </div>
+      <button class="btn-theme" id="themeToggle" title="Toggle Theme">\ud83c\udf19</button>
+    </div>
+  </header>
+
+  <!-- APP LAYOUT -->
+  <div class="app-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Navigation</div>
+        <a href="index.html" class="nav-item">
+          <span class="nav-icon">\ud83d\udcca</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="stock_exchange.html" class="nav-item active">
+          <span class="nav-icon">\ud83d\udcc8</span>
+          <span>Stock Exchange</span>
+        </a>
+        <a href="otc_trading.html" class="nav-item">
+          <span class="nav-icon">\ud83e\udd1d</span>
+          <span>OTC Trading</span>
+        </a>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">Watchlist</div>
+        <div class="mini-watchlist" id="sidebarWatchlist"></div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <!-- PAGE HEADER -->
+      <div class="page-header">
+        <div>
+          <div class="page-title">\ud83d\udcc8 Stock Exchange Derivatives</div>
+          <div class="page-subtitle">Exchange-traded: Futures, Options, Index Derivatives, Currency Contracts, Warrants & CFDs</div>
+        </div>
+      </div>
+
+      <!-- STATS ROW -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Balance</div>
+          <div class="stat-value" id="balanceValue">$500,000.00</div>
+          <div class="stat-change up">\ud83d\udcb0 Available</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Equity</div>
+          <div class="stat-value" id="equityValue">$500,000.00</div>
+          <div class="stat-change up" id="totalPnL">+$0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Used Margin</div>
+          <div class="stat-value" id="usedMarginValue">$0.00</div>
+          <div class="stat-change">\ud83d\udccc Collateral</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Free Margin</div>
+          <div class="stat-value green" id="freeMarginValue">$500,000.00</div>
+          <div class="stat-change up">\u2705 Tradeable</div>
+        </div>
+      </div>
+
+      <!-- MAIN TRADING AREA -->
+      <div style="display:grid;grid-template-columns:1fr 320px;gap:12px;padding:0 24px 16px;">
+
+        <!-- LEFT COLUMN: Chart + Market Table -->
+        <div style="display:flex;flex-direction:column;gap:12px;">
+
+          <!-- CHART CARD -->
+          <div class="card">
+            <div class="chart-toolbar">
+              <div class="chart-toolbar-left">
+                <div class="asset-selector-wrapper">
+                  <div>
+                    <select class="form-input select-styled" id="assetSelect" style="width:200px;padding:6px 28px 6px 10px;font-size:12px;margin:0;"></select>
+                  </div>
+                  <div class="asset-price-display" id="chartAssetPrice">\u2014</div>
+                  <div class="asset-change-display up" id="chartAssetChange">\u2014</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <div class="chart-timeframes">
+                  <button class="tf-btn active" data-tf="1D" onclick="setTimeframe('1D')">1D</button>
+                  <button class="tf-btn" data-tf="1W" onclick="setTimeframe('1W')">1W</button>
+                  <button class="tf-btn" data-tf="1M" onclick="setTimeframe('1M')">1M</button>
+                  <button class="tf-btn" data-tf="3M" onclick="setTimeframe('3M')">3M</button>
+                </div>
+                <div class="chart-types">
+                  <button class="ct-btn active" data-type="line" onclick="setChartType('line')">Line</button>
+                  <button class="ct-btn" data-type="area" onclick="setChartType('area')">Area</button>
+                  <button class="ct-btn" data-type="candle" onclick="setChartType('candle')">OHLC</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ASSET INFO BAR -->
+            <div style="display:flex;gap:20px;padding:0 16px 10px;flex-wrap:wrap;" id="assetInfoBar">
+              <div style="font-size:11px;color:var(--text-muted)">Open: <span class="text-mono fw-600" id="infoOpen">\u2014</span></div>
+              <div style="font-size:11px;color:var(--text-muted)">High: <span class="text-mono fw-600 text-green" id="infoHigh">\u2014</span></div>
+              <div style="font-size:11px;color:var(--text-muted)">Low: <span class="text-mono fw-600 text-red" id="infoLow">\u2014</span></div>
+              <div style="font-size:11px;color:var(--text-muted)">Prev Close: <span class="text-mono fw-600" id="infoPrevClose">\u2014</span></div>
+              <div style="font-size:11px;color:var(--text-muted)">Expiry: <span class="text-mono fw-600" id="infoExpiry">\u2014</span></div>
+              <div style="font-size:11px;color:var(--text-muted)">Lot Size: <span class="text-mono fw-600" id="infoLot">\u2014</span></div>
+              <div style="font-size:11px;color:var(--text-muted)">Margin: <span class="text-mono fw-600" id="infoMargin">\u2014</span>%</div>
+            </div>
+
+            <div class="chart-container">
+              <canvas id="mainChart"></canvas>
+            </div>
+            <div class="chart-container" style="padding:0 16px 8px;">
+              <div style="font-size:10px;color:var(--text-muted);padding:4px 0;">Volume</div>
+              <canvas id="volumeChart"></canvas>
+            </div>
+          </div>
+
+          <!-- MARKET TABLE CARD -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">\ud83d\udccb Exchange-Traded Derivatives</div>
+              <div class="card-actions">
+                <span class="card-badge badge-blue">Live</span>
+                <span class="card-badge badge-green" style="margin-left:4px;" id="stockAssetCount">18 Instruments</span>
+              </div>
+            </div>
+
+            <!-- CATEGORY FILTER TABS -->
+            <div class="tab-nav" data-tab-group="marketFilter" style="margin-bottom:0;">
+              <button class="tab-btn active" data-tab="tabAll" data-tab-group="marketFilter">All</button>
+              <button class="tab-btn" data-tab="tabFutures" data-tab-group="marketFilter">Futures</button>
+              <button class="tab-btn" data-tab="tabOptions" data-tab-group="marketFilter">Options</button>
+              <button class="tab-btn" data-tab="tabCurrency" data-tab-group="marketFilter">FX</button>
+              <button class="tab-btn" data-tab="tabWarrants" data-tab-group="marketFilter">Warrants</button>
+              <button class="tab-btn" data-tab="tabCFDs" data-tab-group="marketFilter">CFDs</button>
+            </div>
+
+            <div id="tabAll" class="tab-content active" data-tab-panel="marketFilter">
+              <div id="stockMarketTable"></div>
+            </div>
+            <div id="tabFutures" class="tab-content" data-tab-panel="marketFilter">
+              <div id="stockFuturesTable"></div>
+            </div>
+            <div id="tabOptions" class="tab-content" data-tab-panel="marketFilter">
+              <div id="stockOptionsTable"></div>
+            </div>
+            <div id="tabCurrency" class="tab-content" data-tab-panel="marketFilter">
+              <div id="stockCurrencyTable"></div>
+            </div>
+            <div id="tabWarrants" class="tab-content" data-tab-panel="marketFilter">
+              <div id="stockWarrantsTable"></div>
+            </div>
+            <div id="tabCFDs" class="tab-content" data-tab-panel="marketFilter">
+              <div id="stockCFDsTable"></div>
+            </div>
+          </div>
+
+        </div><!-- /LEFT COLUMN -->
+
+        <!-- RIGHT COLUMN: Trading Panel + Order Book -->
+        <div style="display:flex;flex-direction:column;gap:12px;">
+
+          <!-- TRADING PANEL -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">\u26a1 Execute Trade</div>
+              <span class="card-badge badge-blue" id="tradeAssetName">\u2014</span>
+            </div>
+            <div class="trading-panel">
+              <!-- Buy / Sell Tabs -->
+              <div class="trade-tabs">
+                <button class="trade-tab active-buy" id="buyTabBtn">\u25b2 BUY / LONG</button>
+                <button class="trade-tab" id="sellTabBtn">\u25bc SELL / SHORT</button>
+              </div>
+
+              <!-- Order Type -->
+              <div class="order-types">
+                <button class="order-type-btn active" data-type="market">Market</button>
+                <button class="order-type-btn" data-type="limit">Limit</button>
+                <button class="order-type-btn" data-type="stop">Stop</button>
+              </div>
+
+              <form id="tradeForm">
+                <!-- Asset Description -->
+                <div style="background:var(--bg-tertiary);border:1px solid var(--border-color);border-radius:6px;padding:8px 10px;margin-bottom:12px;font-size:11px;color:var(--text-secondary);line-height:1.5;" id="assetDesc">
+                  Select a derivative from the market table or dropdown above to trade.
+                </div>
+
+                <!-- Price Input -->
+                <div class="form-group">
+                  <div class="form-label">Price <span id="priceTypeLabel">Market Price</span></div>
+                  <input class="form-input green-focus" type="number" id="tradePrice" step="0.0001" min="0" placeholder="Auto (Market)" />
+                </div>
+
+                <!-- Quantity -->
+                <div class="form-group">
+                  <div class="form-label">Quantity <span>Contracts</span></div>
+                  <input class="form-input" type="number" id="tradeQty" min="1" value="1" placeholder="1" />
+                  <div class="qty-presets">
+                    <button type="button" class="qty-preset-btn" data-qty="1">1</button>
+                    <button type="button" class="qty-preset-btn" data-qty="5">5</button>
+                    <button type="button" class="qty-preset-btn" data-qty="10">10</button>
+                    <button type="button" class="qty-preset-btn" data-qty="25">25</button>
+                  </div>
+                </div>
+
+                <!-- Stop Loss / Take Profit -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <div class="form-group" style="margin-bottom:0;">
+                    <div class="form-label">Stop Loss</div>
+                    <input class="form-input red-focus" type="number" id="stopLoss" step="0.01" min="0" placeholder="Optional" />
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <div class="form-label">Take Profit</div>
+                    <input class="form-input green-focus" type="number" id="takeProfit" step="0.01" min="0" placeholder="Optional" />
+                  </div>
+                </div>
+                <div style="margin-bottom:12px;"></div>
+
+                <!-- Order Summary -->
+                <div class="order-summary">
+                  <div class="order-summary-row">
+                    <span>Est. Total</span>
+                    <span class="value" id="orderTotal">\u2014</span>
+                  </div>
+                  <div class="order-summary-row">
+                    <span>Req. Margin</span>
+                    <span class="value" id="orderMargin">\u2014</span>
+                  </div>
+                  <div class="order-summary-row">
+                    <span>Est. Fee</span>
+                    <span class="value" id="orderFee">\u2014</span>
+                  </div>
+                  <div class="order-summary-row" style="border-top:1px solid var(--border-color);padding-top:6px;margin-top:4px;">
+                    <span>Available</span>
+                    <span class="value green" id="availableBalance">\u2014</span>
+                  </div>
+                </div>
+
+                <button type="submit" class="execute-btn buy" id="executeBtn">BUY \u2014</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- ORDER BOOK -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">\u2696\ufe0f Order Book</div>
+              <span class="card-badge badge-blue">Live Depth</span>
+            </div>
+            <div class="order-book scrollable" id="orderBookContent" style="max-height:280px;">
+              <div class="empty-state"><div class="empty-icon">\ud83d\udcd6</div>Select an asset</div>
+            </div>
+          </div>
+
+        </div><!-- /RIGHT COLUMN -->
+      </div>
+
+      <!-- PORTFOLIO + HISTORY TABS -->
+      <div style="padding:0 24px 24px;">
+        <div class="card">
+          <div class="tab-nav" data-tab-group="portfolio">
+            <button class="tab-btn active" data-tab="tabPositions" data-tab-group="portfolio">\ud83d\udcbc Positions</button>
+            <button class="tab-btn" data-tab="tabHistory" data-tab-group="portfolio">\ud83d\udccb Trade History</button>
+          </div>
+
+          <!-- Positions Tab -->
+          <div id="tabPositions" class="tab-content active" data-tab-panel="portfolio">
+            <div class="scrollable" style="max-height:300px;">
+              <table class="positions-table">
+                <thead>
+                  <tr>
+                    <th>Symbol</th><th>Side</th><th>Qty</th>
+                    <th>Avg Price</th><th>Current Price</th>
+                    <th>P&L</th><th>P&L %</th><th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="portfolioTableBody">
+                  <tr><td colspan="8" class="empty-state"><div class="empty-icon">\ud83d\udcc2</div>No open positions</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- History Tab -->
+          <div id="tabHistory" class="tab-content" data-tab-panel="portfolio">
+            <div class="scrollable" style="max-height:300px;">
+              <table class="trade-history-table">
+                <thead>
+                  <tr><th>Time</th><th>Symbol</th><th>Side</th><th>Qty</th><th>Price</th><th>Total</th><th>P&L</th><th>Status</th></tr>
+                </thead>
+                <tbody id="tradeHistoryBody">
+                  <tr><td colspan="8" class="empty-state"><div class="empty-icon">\ud83d\udccb</div>No trades yet</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    // Stock page extras: asset info bar + category tables + description
+    const _origInit = window.addEventListener;
+    document.addEventListener('DOMContentLoaded', () => {
+      // Render category sub-tables
+      setTimeout(() => {
+        if (typeof STOCK_EXCHANGE_DERIVATIVES !== 'undefined' && typeof renderMarketTable === 'function') {
+          renderMarketTable('stockFuturesTable', STOCK_EXCHANGE_DERIVATIVES.filter(a => a.type.includes('Future')));
+          renderMarketTable('stockOptionsTable', STOCK_EXCHANGE_DERIVATIVES.filter(a => a.type.includes('Option')));
+          renderMarketTable('stockCurrencyTable', STOCK_EXCHANGE_DERIVATIVES.filter(a => a.type.includes('Currency')));
+          renderMarketTable('stockWarrantsTable', STOCK_EXCHANGE_DERIVATIVES.filter(a => a.type === 'Warrant'));
+          renderMarketTable('stockCFDsTable', STOCK_EXCHANGE_DERIVATIVES.filter(a => a.type === 'CFD'));
+          document.getElementById('stockAssetCount').textContent = STOCK_EXCHANGE_DERIVATIVES.length + ' Instruments';
+        }
+      }, 200);
+    });
+
+    // Patch selectAssetAndTrade to update info bar & description
+    const _origSelect = window.selectAssetAndTrade;
+    window.selectAssetAndTrade = function(assetId) {
+      _origSelect(assetId);
+      const asset = typeof findAsset === 'function' ? findAsset(assetId) : null;
+      if (!asset) return;
+      // Info bar
+      const history = (window.state?.priceHistory || {})[assetId] || [];
+      const highs = history.map(c => c.high);
+      const lows = history.map(c => c.low);
+      const el = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+      el('infoOpen', typeof formatPrice === 'function' ? formatPrice(asset.prevClose, assetId) : asset.prevClose);
+      el('infoHigh', highs.length ? (typeof formatPrice === 'function' ? formatPrice(Math.max(...highs), assetId) : Math.max(...highs).toFixed(2)) : '\u2014');
+      el('infoLow', lows.length ? (typeof formatPrice === 'function' ? formatPrice(Math.min(...lows), assetId) : Math.min(...lows).toFixed(2)) : '\u2014');
+      el('infoPrevClose', typeof formatPrice === 'function' ? formatPrice(asset.prevClose, assetId) : asset.prevClose);
+      el('infoExpiry', asset.expiry || '\u2014');
+      el('infoLot', asset.lotSize || '\u2014');
+      el('infoMargin', asset.margin || '\u2014');
+      // Asset description box
+      const descEl = document.getElementById('assetDesc');
+      if (descEl && asset.description) {
+        descEl.innerHTML = `<strong>${asset.symbol}</strong> \u2014 ${asset.description}${asset.strike ? ` | Strike: <strong>${asset.strike}</strong>` : ''}`;
+      }
+      // Sync dropdown
+      const sel = document.getElementById('assetSelect');
+      if (sel && sel.value !== assetId) sel.value = assetId;
+    };
+  </script>
+</body>
+</html>
